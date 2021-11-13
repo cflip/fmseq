@@ -9,7 +9,8 @@ const int SAMPLE_RATE = 44100;
 const float sequence[8] = { 130.81f, 220.f, 130.81f, 440.f, 330.f, 440.f, 130.81f, 261.63f };
 
 struct CallbackInfo {
-	int sampleCount;
+	int samplesDone;
+	int samplesPerStep;
 	int currentStep;
 };
 
@@ -19,9 +20,15 @@ void AudioCallback(void *userData, Uint8 *rawBuffer, int bytes)
 	int length = bytes / sizeof(float);
 	CallbackInfo *info = (CallbackInfo*)userData;
 
-	for (int i = 0; i < length; i++, info->sampleCount++) {
+	for (int i = 0; i < length; i++, info->samplesDone++) {
 		float freq = sequence[info->currentStep];
-		float time = (float)info->sampleCount / (float)SAMPLE_RATE;
+		float time = (float)info->samplesDone / (float)SAMPLE_RATE;
+
+		if (info->samplesDone >= info->samplesPerStep) {
+			info->samplesDone = 0;
+			info->currentStep = (info->currentStep + 1) % 8;
+		}
+
 		buffer[i] = (sinf(2.0f * M_PI * freq * time)) * AMPLITUDE;
 	}
 }
@@ -60,7 +67,8 @@ int main(int argc, char** argv)
 	SDL_Event event;
 
 	CallbackInfo info;
-	info.sampleCount = 0;
+	info.samplesDone = 0;
+	info.samplesPerStep = SAMPLE_RATE * 0.2f;
 	info.currentStep = 0;
 
 	SDL_AudioSpec desiredSpec;
@@ -96,13 +104,12 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		info.currentStep = (info.currentStep + 1) % 8;
 		DrawInterface(renderer, info.currentStep);
 
 		SDL_RenderPresent(renderer);
 		SDL_UpdateWindowSurface(window);
 
-		SDL_Delay(200);
+		SDL_Delay(10);
 	}
 
 	SDL_PauseAudio(1);
