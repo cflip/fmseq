@@ -4,7 +4,6 @@
 #include <iostream>
 
 const float AMPLITUDE = 0.2f;
-const int SAMPLE_RATE = 44100;
 
 const float sequence[8] = { 130.81f, 220.f, 130.81f, 440.f, 330.f, 440.f, 130.81f, 261.63f };
 
@@ -12,6 +11,7 @@ struct CallbackInfo {
 	int samplesDone;
 	int samplesPerStep;
 	int currentStep;
+	int sampleRate;
 };
 
 void AudioCallback(void *userData, Uint8 *rawBuffer, int bytes)
@@ -22,7 +22,7 @@ void AudioCallback(void *userData, Uint8 *rawBuffer, int bytes)
 
 	for (int i = 0; i < length; i++, info->samplesDone++) {
 		float freq = sequence[info->currentStep];
-		float time = (float)info->samplesDone / (float)SAMPLE_RATE;
+		float time = (float)info->samplesDone / (float)info->sampleRate;
 
 		if (info->samplesDone >= info->samplesPerStep) {
 			info->samplesDone = 0;
@@ -67,12 +67,9 @@ int main(int argc, char** argv)
 	SDL_Event event;
 
 	CallbackInfo info;
-	info.samplesDone = 0;
-	info.samplesPerStep = SAMPLE_RATE * 0.2f;
-	info.currentStep = 0;
 
 	SDL_AudioSpec desiredSpec;
-	desiredSpec.freq = SAMPLE_RATE;
+	desiredSpec.freq = 44100;
 	desiredSpec.format = AUDIO_F32SYS;
 	desiredSpec.channels = 1;
 	desiredSpec.samples = 2048;
@@ -85,9 +82,13 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	if (desiredSpec.format != obtainedSpec.format) {
+	if (desiredSpec.format != obtainedSpec.format)
 		std::cerr << "Different format: " << obtainedSpec.format << std::endl;
-	}
+
+	info.samplesDone = 0;
+	info.samplesPerStep = obtainedSpec.freq * 0.4f;
+	info.currentStep = 0;
+	info.sampleRate = obtainedSpec.freq;
 
 	SDL_PauseAudio(0);
 
