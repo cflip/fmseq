@@ -1,2 +1,6 @@
-fmseq: main.cpp
-	g++ main.cpp -lSDL2 -o fmseq
+SRC=main.cpp\
+	audio.cpp\
+	gui.cpp
+
+fmseq: ${SRC}
+	g++ ${SRC} -lSDL2 -o fmseq
