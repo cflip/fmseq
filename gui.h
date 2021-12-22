@@ -30,6 +30,8 @@ public:
 	void Repaint(SDL_Renderer*, int currentStep);
 private:
 	std::vector<Knob> m_knobs;
+
+	Sequence& m_sequence;
 	Knob* m_activeKnob{ nullptr };
 	int m_dragStart{ 0 };
 };

@@ -22,6 +22,7 @@ bool Knob::InBounds(int x, int y)
 }
 
 GUI::GUI(Sequence& seq)
+	: m_sequence(seq)
 {
 	int i = 0;
 	for (auto& step : seq.steps) {
@@ -63,14 +64,14 @@ void GUI::OnMouseMove(int x, int y)
 void GUI::Repaint(SDL_Renderer* renderer, int currentStep)
 {
 	SDL_Rect rect = {
-		(640 - 8 * (32 + 8)) / 2,
-		(320 - 32) / 2,
+		40,
+		40,
 		32,
 		32
 	};
 
 	for (int i = 0; i < 8; i++) {
-		SDL_SetRenderDrawColor(renderer, 128, i * (255 / 8), 255, 255);
+		SDL_SetRenderDrawColor(renderer, m_sequence.steps[i].modDepth * 8, m_sequence.steps[i].modFreq * 2, m_sequence.steps[i].carrierFreq / 3, 255);
 
 		if (i == currentStep)
 			SDL_RenderFillRect(renderer, &rect);
@@ -79,6 +80,8 @@ void GUI::Repaint(SDL_Renderer* renderer, int currentStep)
 
 		rect.x += rect.w + 8;
 	}
+
+	SDL_SetRenderDrawColor(renderer, 127, 127, 255, 255);
 
 	for (Knob& knob : m_knobs) {
 		knob.Draw(renderer);
