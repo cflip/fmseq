@@ -1,2 +1,10 @@
 .vscode
 fmseq
+
+# Visual Studio garbage
+Debug/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.pdb
