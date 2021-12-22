@@ -6,17 +6,19 @@
 
 const float AMPLITUDE = 0.2f;
 float sequence[8] = { 130.81f, 220.f, 130.81f, 440.f, 330.f, 440.f, 130.81f, 261.63f };
+float modSequence[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+float mulSequence[8] = { 1, 1, 1, 1, 1, 1, 1, 1 };
 
 class Knob {
 public:
-	Knob(int x, int y, float *valuePtr)
-		: m_x(x), m_y(y), value(valuePtr) {}
+	Knob(int x, int y, float *valuePtr, float scaling = 1.f)
+		: m_x(x), m_y(y), value(valuePtr), valueScaling(scaling) {}
 
 	void Draw(SDL_Renderer*);
 	bool InBounds(int x, int y);
 
 	float *value;
-	float valueScaling = 0.3f;
+	float valueScaling;
 private:
 	int m_x, m_y;
 };
@@ -62,8 +64,9 @@ void AudioCallback(void *userData, Uint8 *rawBuffer, int bytes)
 	CallbackInfo *info = (CallbackInfo*)userData;
 
 	for (int i = 0; i < length; i++, info->samplesDone++) {
-		float freq = sequence[info->currentStep];
 		float time = (float)info->samplesDone / (float)info->sampleRate;
+		float modWave = sinf(2.0f * M_PI * modSequence[info->currentStep] * time);
+		float freq = sequence[info->currentStep] + modWave * mulSequence[info->currentStep] ;
 
 		if (info->samplesDone >= info->samplesPerStep) {
 			info->samplesDone = 0;
@@ -137,14 +140,32 @@ int main(int argc, char** argv)
 
 	SDL_PauseAudio(0);
 
-	knobs.emplace_back(10, 120, sequence);
-	knobs.emplace_back(40, 120, sequence + 1);
-	knobs.emplace_back(70, 120, sequence + 2);
-	knobs.emplace_back(110, 120, sequence + 3);
-	knobs.emplace_back(140, 120, sequence + 4);
-	knobs.emplace_back(170, 120, sequence + 5);
-	knobs.emplace_back(210, 120, sequence + 6);
-	knobs.emplace_back(240, 120, sequence + 7);
+	knobs.emplace_back(10, 120, sequence, 0.1f);
+	knobs.emplace_back(40, 120, sequence + 1, 0.1f);
+	knobs.emplace_back(70, 120, sequence + 2, 0.1f);
+	knobs.emplace_back(110, 120, sequence + 3, 0.1f);
+	knobs.emplace_back(140, 120, sequence + 4, 0.1f);
+	knobs.emplace_back(170, 120, sequence + 5, 0.1f);
+	knobs.emplace_back(210, 120, sequence + 6, 0.1f);
+	knobs.emplace_back(240, 120, sequence + 7, 0.1f);
+
+	knobs.emplace_back(10, 180, modSequence);
+	knobs.emplace_back(40, 180, modSequence + 1);
+	knobs.emplace_back(70, 180, modSequence + 2);
+	knobs.emplace_back(110, 180, modSequence + 3);
+	knobs.emplace_back(140, 180, modSequence + 4);
+	knobs.emplace_back(170, 180, modSequence + 5);
+	knobs.emplace_back(210, 180, modSequence + 6);
+	knobs.emplace_back(240, 180, modSequence + 7);
+
+	knobs.emplace_back(10, 220, mulSequence, 3.0f);
+	knobs.emplace_back(40, 220, mulSequence + 1, 3.0f);
+	knobs.emplace_back(70, 220, mulSequence + 2, 3.0f);
+	knobs.emplace_back(110, 220, mulSequence + 3, 3.0f);
+	knobs.emplace_back(140, 220, mulSequence + 4, 3.0f);
+	knobs.emplace_back(170, 220, mulSequence + 5, 3.0f);
+	knobs.emplace_back(210, 220, mulSequence + 6, 3.0f);
+	knobs.emplace_back(240, 220, mulSequence + 7, 3.0f);
 
 	bool running = true;
 	Knob* mouseKnob = nullptr;
@@ -166,7 +187,7 @@ int main(int argc, char** argv)
 				break;
 			case SDL_MOUSEMOTION:
 				if (mouseKnob) {
-					*mouseKnob->value -= (yStart - event.button.y);
+					*mouseKnob->value -= (yStart - event.button.y) / mouseKnob->valueScaling;
 					yStart = event.button.y;
 					if (*mouseKnob->value < 0) *mouseKnob->value = 0;
 				}
