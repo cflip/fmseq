@@ -5,9 +5,9 @@
 
 struct SDL_Renderer;
 
-class Knob {
+class Slider {
 public:
-	Knob(int x, int y, float* valuePtr, float scaling = 1.f)
+	Slider(int x, int y, float* valuePtr, float scaling = 1.f)
 		: m_x(x), m_y(y), value(valuePtr), valueScaling(scaling) {}
 
 	void Draw(SDL_Renderer*);
@@ -29,9 +29,9 @@ public:
 
 	void Repaint(SDL_Renderer*, int currentStep);
 private:
-	std::vector<Knob> m_knobs;
+	std::vector<Slider> m_sliders;
 
 	Sequence& m_sequence;
-	Knob* m_activeKnob{ nullptr };
+	Slider* m_activeSlider{ nullptr };
 	int m_dragStart{ 0 };
 };

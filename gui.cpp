@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include "sequence.h"
 
-void Knob::Draw(SDL_Renderer* renderer)
+void Slider::Draw(SDL_Renderer* renderer)
 {
 	constexpr int Radius = 25;
 	SDL_Rect rect = { m_x, m_y, Radius, Radius };
@@ -12,7 +12,7 @@ void Knob::Draw(SDL_Renderer* renderer)
 	SDL_RenderDrawLine(renderer, m_x, m_y + (*value * valueScaling), m_x + Radius, m_y + (*value * valueScaling));
 }
 
-bool Knob::InBounds(int x, int y)
+bool Slider::InBounds(int x, int y)
 {
 	constexpr int Radius = 25;
 	SDL_Rect rect = { m_x, m_y, Radius, Radius };
@@ -27,17 +27,17 @@ GUI::GUI(Sequence& seq)
 	int i = 0;
 	for (auto& step : seq.steps) {
 		++i;
-		m_knobs.emplace_back(i * 30 + 10, 120, &step.carrierFreq, 0.1f);
-		m_knobs.emplace_back(i * 30 + 10, 180, &step.modFreq);
-		m_knobs.emplace_back(i * 30 + 10, 220, &step.modDepth, 3.0f);
+		m_sliders.emplace_back(i * 30 + 10, 120, &step.carrierFreq, 0.1f);
+		m_sliders.emplace_back(i * 30 + 10, 180, &step.modFreq);
+		m_sliders.emplace_back(i * 30 + 10, 220, &step.modDepth, 3.0f);
 	}
 }
 
 void GUI::OnMouseDown(int x, int y)
 {
-	for (Knob& knob : m_knobs) {
-		if (knob.InBounds(x, y)) {
-			m_activeKnob = &knob;
+	for (Slider& slider : m_sliders) {
+		if (slider.InBounds(x, y)) {
+			m_activeSlider = &slider;
 			m_dragStart = y;
 			return;
 		}
@@ -46,18 +46,18 @@ void GUI::OnMouseDown(int x, int y)
 
 void GUI::OnMouseUp()
 {
-	m_activeKnob = nullptr;
+	m_activeSlider = nullptr;
 	m_dragStart = 0;
 }
 
 void GUI::OnMouseMove(int x, int y)
 {
-	if (m_activeKnob) {
-		*m_activeKnob->value -= (m_dragStart - y) / m_activeKnob->valueScaling;
+	if (m_activeSlider) {
+		*m_activeSlider->value -= (m_dragStart - y) / m_activeSlider->valueScaling;
 		m_dragStart = y;
 
-		if (*m_activeKnob->value < 0) 
-			*m_activeKnob->value = 0;
+		if (*m_activeSlider->value < 0)
+			*m_activeSlider->value = 0;
 	}
 }
 
@@ -83,7 +83,7 @@ void GUI::Repaint(SDL_Renderer* renderer, int currentStep)
 
 	SDL_SetRenderDrawColor(renderer, 127, 127, 255, 255);
 
-	for (Knob& knob : m_knobs) {
-		knob.Draw(renderer);
+	for (Slider& slider : m_sliders) {
+		slider.Draw(renderer);
 	}
 }
