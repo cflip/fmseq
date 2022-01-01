@@ -1,14 +1,14 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include <vector>
 #include "sequence.h"
-
-struct SDL_Renderer;
 
 class Slider {
 public:
 	Slider(int x, int y, float* valuePtr, float scaling = 1.f)
-		: m_x(x), m_y(y), value(valuePtr), valueScaling(scaling) {}
+		: m_bounds({ x, y, 25, 75 }), value(valuePtr), valueScaling(scaling) {}
 
 	void Draw(SDL_Renderer*);
 	bool InBounds(int x, int y);
@@ -16,7 +16,7 @@ public:
 	float* value;
 	float valueScaling;
 private:
-	int m_x, m_y;
+	SDL_Rect m_bounds;
 };
 
 class GUI {

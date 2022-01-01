@@ -5,20 +5,14 @@
 
 void Slider::Draw(SDL_Renderer* renderer)
 {
-	constexpr int Radius = 25;
-	SDL_Rect rect = { m_x, m_y, Radius, Radius };
-	SDL_RenderDrawRect(renderer, &rect);
-
-	SDL_RenderDrawLine(renderer, m_x, m_y + (*value * valueScaling), m_x + Radius, m_y + (*value * valueScaling));
+	SDL_RenderDrawRect(renderer, &m_bounds);
+	SDL_RenderDrawLine(renderer, m_bounds.x, m_bounds.y + (*value * valueScaling), m_bounds.x + m_bounds.w, m_bounds.y + (*value * valueScaling));
 }
 
 bool Slider::InBounds(int x, int y)
 {
-	constexpr int Radius = 25;
-	SDL_Rect rect = { m_x, m_y, Radius, Radius };
 	SDL_Point point = { x, y };
-
-	return SDL_PointInRect(&point, &rect);
+	return SDL_PointInRect(&point, &m_bounds);
 }
 
 GUI::GUI(Sequence& seq)
@@ -26,10 +20,10 @@ GUI::GUI(Sequence& seq)
 {
 	int i = 0;
 	for (auto& step : seq.steps) {
-		++i;
-		m_sliders.emplace_back(i * 30 + 10, 120, &step.carrierFreq, 0.1f);
-		m_sliders.emplace_back(i * 30 + 10, 180, &step.modFreq);
-		m_sliders.emplace_back(i * 30 + 10, 220, &step.modDepth, 3.0f);
+		m_sliders.emplace_back(i * 40 + 14, 60, &step.carrierFreq, 0.1f);
+		m_sliders.emplace_back(i * 40 + 14, 145, &step.modFreq);
+		m_sliders.emplace_back(i * 40 + 14, 230, &step.modDepth, 3.0f);
+		i++;
 	}
 }
 
@@ -63,12 +57,7 @@ void GUI::OnMouseMove(int x, int y)
 
 void GUI::Repaint(SDL_Renderer* renderer, int currentStep)
 {
-	SDL_Rect rect = {
-		40,
-		40,
-		32,
-		32
-	};
+	SDL_Rect rect = { 10, 10, 32, 32 };
 
 	for (int i = 0; i < 8; i++) {
 		SDL_SetRenderDrawColor(renderer, m_sequence.steps[i].modDepth * 8, m_sequence.steps[i].modFreq * 2, m_sequence.steps[i].carrierFreq / 3, 255);
