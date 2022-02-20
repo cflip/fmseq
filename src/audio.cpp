@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <iostream>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "sequence.h"
 

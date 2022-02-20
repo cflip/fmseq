@@ -1,6 +1,5 @@
 #include "gui.h"
 
-#include <SDL2/SDL.h>
 #include "sequence.h"
 
 void Slider::Draw(SDL_Renderer* renderer)
